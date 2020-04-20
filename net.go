@@ -87,7 +87,7 @@ func (e *EurekaConnection) readAppInto(app *Application) error {
 func (e *EurekaConnection) GetApps() (map[string]*Application, error) {
 	slug := EurekaURLSlugs["Apps"]
 	reqURL := e.generateURL(slug)
-	log.Debugf("Getting all apps from url %s", reqURL)
+	//log.Debugf("Getting all apps from url %s", reqURL)
 	body, rcode, err := getBody(reqURL, e.UseJson)
 	if err != nil {
 		log.Errorf("Couldn't get apps, error: %s", err.Error())
@@ -114,10 +114,11 @@ func (e *EurekaConnection) GetApps() (map[string]*Application, error) {
 	for i, a := range r.Applications {
 		apps[a.Name] = r.Applications[i]
 	}
-	for name, app := range apps {
-		log.Debugf("Parsing metadata for app %s", name)
+	for _, app := range apps {
+		//log.Debugf("Parsing metadata for app %s", name)
 		app.ParseAllMetadata()
 	}
+	log.Debugf("Parsing metadata for app %s", apps)
 	return apps, nil
 }
 
@@ -784,19 +785,19 @@ func (e EurekaConnection) UpdateInstanceStatus(ins *Instance, status StatusType)
 func (e *EurekaConnection) HeartBeatInstance(ins *Instance) error {
 	slug := fmt.Sprintf("%s/%s/%s", EurekaURLSlugs["Apps"], ins.App, ins.Id())
 	reqURL := e.generateURL(slug)
-	log.Debugf("Sending heartbeat with url %s", reqURL)
+	//log.Debugf("Sending heartbeat with url %s", reqURL)
 	req, err := http.NewRequest("PUT", reqURL, nil)
 	if err != nil {
-		log.Errorf("Could not create request for heartbeat, error: %s", err.Error())
+		log.Errorf("Sending heartbeat with url %s, Could not create request for heartbeat, error: %s", reqURL, err.Error())
 		return err
 	}
 	_, rcode, err := netReq(req)
 	if err != nil {
-		log.Errorf("Error sending heartbeat for Instance=%s App=%s, error: %s", ins.Id(), ins.App, err.Error())
+		log.Errorf("Sending heartbeat with url %s, Error sending heartbeat for Instance=%s App=%s, error: %s", reqURL, ins.Id(), ins.App, err.Error())
 		return err
 	}
 	if rcode != http.StatusOK {
-		log.Errorf("Sending heartbeat for Instance=%s App=%s returned code %d", ins.Id(), ins.App, rcode)
+		log.Errorf("Sending heartbeat with url %s, Sending heartbeat for Instance=%s App=%s returned code %d", reqURL, ins.Id(), ins.App, rcode)
 		return &unsuccessfulHTTPResponse{rcode, "heartbeat failed"}
 	}
 	return nil
