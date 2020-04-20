@@ -114,11 +114,13 @@ func (e *EurekaConnection) GetApps() (map[string]*Application, error) {
 	for i, a := range r.Applications {
 		apps[a.Name] = r.Applications[i]
 	}
-	for _, app := range apps {
+	var appNames []string
+	for name, app := range apps {
 		//log.Debugf("Parsing metadata for app %s", name)
+		appNames = append(appNames, name)
 		app.ParseAllMetadata()
 	}
-	log.Debugf("Parsing metadata for app %s", apps)
+	//log.Debugf("Parsing metadata for app %s", appNames)
 	return apps, nil
 }
 
